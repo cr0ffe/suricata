@@ -66,9 +66,12 @@
                 const blob = new Blob([processedContent], {type: "text/plain"});
                 const url = URL.createObjectURL(blob);
 
+                const originalName = file.name;
+                const processedName = originalName;
+
                 progressBar.value = 100; // File processing completed
                 downloadLink.href = url;
-                downloadLink.download = 'processed_suricata.rules';
+                downloadLink.download = processedName;
                 downloadLink.textContent = 'Download Processed File';
                 downloadLink.style.display = 'block';
                 status.textContent = 'Processing complete! Your file is ready for download.';
