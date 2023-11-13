@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Suricata Rules File Processor</title>
+    <style>
+        #drop_zone {
+            width: 300px;
+            height: 200px;
+            padding: 10px;
+            border: 3px dashed #0087F7;
+            margin: 10px;
+            text-align: center;
+            line-height: 200px;
+        }
+        #drop_zone.hover {
+            background-color: #EEE;
+        }
+    </style>
+</head>
+<body>
+    <h2>Suricata Rules File Processor</h2>
+    <div id="drop_zone">Drop file here</div>
+    <progress id="progressBar" value="0" max="100" style="width:100%;"></progress>
+    <div id="status"></div>
+    <a id="downloadLink" style="display:none;">Download Processed File</a>
+
+    <script>
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('drop_zone');
+            dropZone.addEventListener('dragover', handleDragOver, false);
+            dropZone.addEventListener('drop', handleFileSelect, false);
+            dropZone.addEventListener('dragenter', () => dropZone.classList.add('hover'), false);
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('hover'), false);
+        }
+
+        function handleDragOver(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+            evt.dataTransfer.dropEffect = 'copy';
+        }
+
+        function handleFileSelect(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+
+            const file = evt.dataTransfer.files[0];
+            processFile(file);
+        }
+
+        function processFile(file) {
+            const reader = new FileReader();
+            const progressBar = document.getElementById('progressBar');
+            const status = document.getElementById('status');
+            const downloadLink = document.getElementById('downloadLink');
+
+            progressBar.value = 0;
+            progressBar.max = 100;
+            status.textContent = '';
+            downloadLink.style.display = 'none';
+
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                const processedLines = lines.filter(line => !line.startsWith('#'));
+                const processedContent = processedLines.join('\n');
+                const blob = new Blob([processedContent], {type: "text/plain"});
+                const url = URL.createObjectURL(blob);
+
+                progressBar.value = 100; // File processing completed
+                downloadLink.href = url;
+                downloadLink.download = 'processed_suricata.rules';
+                downloadLink.textContent = 'Download Processed File';
+                downloadLink.style.display = 'block';
+                status.textContent = 'Processing complete! Your file is ready for download.';
+            };
+
+            reader.readAsText(file);
+        }
+
+        setupDragAndDrop();
+    </script>
+</body>
+</html>
